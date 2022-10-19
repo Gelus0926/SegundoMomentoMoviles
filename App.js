@@ -12,7 +12,7 @@ const Usuarios = [
   { id: "1", user: "manu", rol: "user", password: "123" },
   { id: "2", user: "carlos", rol: "user", password: "cls" },
   { id: "3", user: "mou", rol: "user", password: "az2" },
-  { id: "4", user: "zeip", rol: "admin", password: "adm123" },
+  { id: "4", user: "gelus", rol: "admin", password: "adm123" },
   { id: "5", user: "cris", rol: "user", password: "4855" },
   { id: "6", user: "zaira", rol: "admin", password: "admin" },
   { id: "7", user: "rolo", rol: "user", password: "2020" }
@@ -72,7 +72,7 @@ function UserScreen({ navigation }) {
             setfullRol("");
             setfullUser("");
             setfullPassword("");
-            navigation.navigate('Profile', { fullUser: fullUser, rol: iniciosesion.rol,id:iniciosesion.id })
+            navigation.navigate('Profile', { fullUser: fullUser, rol: iniciosesion.rol, id: iniciosesion.id })
           }
         }}
 
@@ -87,45 +87,74 @@ function InicioSesion(user, rol, pass) {
   return respuesta;
 }
 
-function ProfileScreen({ route }) {
-  const {control, handleSubmit, formState: {errors}} = useForm({
-    defaultValues:{
-      Cuenta:0,
-      Identificacion:0,
-      Titular:'', 
-      date:'',
-      salario:0
+function ProfileScreen({ route }){
+  const [Datos , setDatos] = useState([]);
+  const [Cuenta, setCuenta] = useState(((Math.random() * (80 - 1 + 1)) + 1).toFixed());
+  const { control, handleSubmit, formState: {errors}   } = useForm({
+    defaultValues: {
+      Cuenta: 0,
+      Identificacion: 0,
+      Titular: '',
+      date: '',
+      salario: 0
     }
   })
 
-  const onSumbit = data  => console.log(data);
+  const onSumbit = data => {
+    data.Cuenta=Cuenta
+    data.id_user=route.params.id
+    console.log(data);
+    setDatos(misDatos=>[...misDatos,data])
+    console.log(Datos)
+  }
+
+  let buscar=()=>{
+    let Encontrado = ''
+    for (let Registro of Datos) {
+      if (Registro.Cuenta == Cuenta) {
+        Encontrado = 'Si'
+        console.log(Registro)
+      }
+    }
+    if (Encontrado == '') {
+      alert("La cuenta no esta registrada");
+    }
+  }
 
   return (
     <View style={styles.container}>
-      <Controller
+      <Text>Perfil: {route.params.fullUser}</Text>
+      <Text>rol: {route.params.rol}</Text>
+      <Text>id: {route.params.id}</Text>
+      {/* <Controller
         control={control}
-        render={({field: {onChange, onBlur, value}})=>(
-          <TextInput
-            style={styles.inputs}
-            placeholder="Cuenta"
-            onChange={onChange}
-            onBlur={onBlur}
-            value={value=((Math.random() * (80 - 1 + 1)) + 1).toFixed()}
-          />
+        rules={{
+          required: true,
+          pattern: /^[A-Za-zÑñáéíóú ]+$/i,
+          maxLength: 30,
+          minLength: 5,
+          
+        }}
+        render={({field:{onChange,onBlur,value}}) => (
+          
         )}
         name="Cuenta"
+      /> */}
+      <TextInput
+        style={styles.inputs}
+        placeholder="Cuenta"
+        value={Cuenta}
       />
-     
-
+    
       <Controller
         control={control}
         rules={{
-          required:true,
-          pattern:/^[0-9]*(\.?)[ 0-9]+$/,
-          maxLength:200,
-          minLength:7
+          required: true,
+          pattern: /^[0-9]+$/,
+          maxLength: 200,
+          minLength: 7
         }}
-        render={({field: {onChange, onBlur, value}})=>(
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.inputs}
             placeholder="Identificacion"
@@ -136,18 +165,16 @@ function ProfileScreen({ route }) {
         )}
         name="Identificacion" //Estado a validar
       />
-      {errors.Identificacion?.type == "required" && <Text style={{color:'red'}}>El campo identificacion es obligatorio</Text>}
-      {errors.Identificacion?.type == "pattern" && <Text style={{color:'red'}}>Ingresar correo electronico valido</Text>}
+      {errors.Identificacion?.type == "required" && <Text style={{ color: 'red' }}>El campo identificacion es obligatorio</Text>}
+      {errors.Identificacion?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es numerico</Text>}
 
       <Controller
         control={control}
         rules={{
-          required:true,
-          pattern:/^[A-Za-z0-9\s]+$/g,
-          max:10000000,
-          min:2000000
+          required: true,
+          pattern: /^[ a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/
         }}
-        render={({field: {onChange, onBlur, value}})=>(
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.inputs}
             placeholder="Titular de la Cuenta"
@@ -158,43 +185,39 @@ function ProfileScreen({ route }) {
         )}
         name="Titular" //Estado a validar
       />
-      {errors.Titular?.type == "required" && <Text style={{color:'red'}}>El salario es obligatorio</Text>}
-      {errors.Titular?.type == "pattern" && <Text style={{color:'red'}}>Este campo solo es numerico</Text>}
-      {errors.Titular?.type == "max" && <Text style={{color:'red'}}>El salario no puede exceder de 10000000</Text>}
-      {errors.Titular?.type == "min" && <Text style={{color:'red'}}>El salario no puede ser menor a 2000000</Text>}
-
-      <Controller
-          control={control}
-          rules={{
-              required:true,
-              pattern:/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(0[1-9]|1[1-9]|2[1-9])$/,
-              maxLength:35,
-              minLength:18
-            }}
-            render={({field: {onChange, onBlur, value}})=>(
-              <TextInput
-                  style={styles.inputs}
-                  placeholder="dd/mm/aa"
-                  type="date"
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-              />
-            )}
-            name="date" //Estado a validar
-      />
-      {errors.date?.type == "required" && <Text style={{color:'red'}}>La fecha digitada es incorrecta</Text>}
-      {errors.date?.type == "pattern" && <Text style={{color:'red'}}>El formato para la fecha es: aa/mm/dd</Text>}
+      {errors.Titular?.type == "required" && <Text style={{ color: 'red' }}>Campo Titular Obligatorio</Text>}
+      {errors.Titular?.type == "pattern" && <Text style={{ color: 'red' }}>Solo debe de contener letras y espacios</Text>}
 
       <Controller
         control={control}
         rules={{
-          required:true,
-          pattern:/^[0-9]*(\.?)[ 0-9]+$/,
-          max:100000000,
-          min:1000000
+          required: true,
+          pattern: /^(?:(?:(?:0?[1-9]|1\d|2[0-8])[/](?:0?[1-9]|1[0-2])|(?:29|30)[/](?:0?[13-9]|1[0-2])|31[/](?:0?[13578]|1[02]))[/](?:0{2,3}[1-9]|0{1,2}[1-9]\d|0?[1-9]\d{2}|[1-9]\d{3})|29[/]0?2[/](?:\d{1,2}(?:0[48]|[2468][048]|[13579][26])|(?:0?[48]|[13579][26]|[2468][048])00))$/
         }}
-        render={({field: {onChange, onBlur, value}})=>(
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={styles.inputs}
+            placeholder="dd/mm/aa"
+            type="date"
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}
+          />
+        )}
+        name="date" //Estado a validar
+      />
+      {errors.date?.type == "required" && <Text style={{ color: 'red' }}>La fecha digitada es incorrecta</Text>}
+      {errors.date?.type == "pattern" && <Text style={{ color: 'red' }}>El formato para la fecha es: aa/mm/dd</Text>}
+
+      <Controller
+        control={control}
+        rules={{
+          required: true,
+          pattern: /^[0-9]+$/,
+          max: 100000000,
+          min: 1000000
+        }}
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.inputs}
             placeholder="Digite el salario"
@@ -205,28 +228,29 @@ function ProfileScreen({ route }) {
         )}
         name="salario" //Estado a validar
       />
-      {errors.salario?.type == "required" && <Text style={{color:'red'}}>El campo salario es obligatorio</Text>}
-      {errors.salario?.type == "pattern" && <Text style={{color:'red'}}>Este campo solo es numerico</Text>}
-      {errors.salario?.type == "max" && <Text style={{color:'red'}}>El limite del salario son 10000000</Text>}
-      {errors.salario?.type == "min" && <Text style={{color:'red'}}>El salario no puede ser menor a 1000000</Text>}
+      {errors.salario?.type == "required" && <Text style={{ color: 'red' }}>El campo salario es obligatorio</Text>}
+      {errors.salario?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es numerico</Text>}
+      {errors.salario?.type == "max" && <Text style={{ color: 'red' }}>El limite del salario son 10000000</Text>}
+      {errors.salario?.type == "min" && <Text style={{ color: 'red' }}>El salario no puede ser menor a 1000000</Text>}
 
       <TouchableOpacity
-        style={{backgroundColor:'#33FFDA',padding:10,marginTop:20,width:90, textAlign:'center'}}
+        style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
         onPress={handleSubmit(onSumbit)}
-        >
-          <Text>Enviar</Text>
+      >
+        <Text>Enviar</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={{backgroundColor:'#33FFDA',padding:10,marginTop:20, width:90, textAlign:'center'}}
-        onPress={handleSubmit(onSumbit)}
-        >
-          <Text>Buscar</Text>
+        style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
+        onPress={buscar}
+      >
+        <Text>Buscar</Text>
       </TouchableOpacity>
+      
       <TouchableOpacity
-        style={{backgroundColor:'#33FFDA',padding:10,marginTop:20,width:90, textAlign:'center'}}
-        onPress={handleSubmit(onSumbit)}
-        >
-          <Text>Eliminar</Text>
+        style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
+        
+      >
+        <Text>Eliminar</Text>
       </TouchableOpacity>
     </View>
   );
@@ -270,26 +294,29 @@ function HomeTabs() {
       }}
     >
       {/* tabBarStyle: desactiva el menú bottom */}
-      <Tab.Screen 
-      name="Inicio" 
-      component={UserScreen} 
-      options={{title:'Inicio', tabBarStyle: { display: "none" },tabBarIcon:({color, size})=>
-      <AntDesign name="lock" size={30} color="black" />
-      }}
-       />
-      <Tab.Screen 
-      name="Profile" 
-      component={ProfileScreen} 
-      options={{title:'Perfil', tabBarIcon:({color, size})=>
-        (<AntDesign name="profile" size={28} color="black" />)
-      }}
+      <Tab.Screen
+        name="Inicio"
+        component={UserScreen}
+        options={{
+          title: 'Inicio', tabBarStyle: { display: "none" }, tabBarIcon: ({ color, size }) =>
+            <AntDesign name="lock" size={30} color="black" />
+        }}
       />
-      <Tab.Screen 
-      name="Account" 
-      component={AccountScreen} 
-      options={{title:'Movimientos', tabBarIcon:({color, size})=>
-        <MaterialCommunityIcons name="bank-transfer" size={35} color="black" />
-      }}
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Perfil', tabBarIcon: ({ color, size }) =>
+            (<AntDesign name="profile" size={28} color="black" />)
+        }}
+      />
+      <Tab.Screen
+        name="Account"
+        component={AccountScreen}
+        options={{
+          title: 'Movimientos', tabBarIcon: ({ color, size }) =>
+            <MaterialCommunityIcons name="bank-transfer" size={35} color="black" />
+        }}
       />
 
     </Tab.Navigator>
@@ -298,7 +325,7 @@ function HomeTabs() {
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+export default function App(){
 
   return (
     <NavigationContainer>
@@ -310,7 +337,6 @@ export default function App() {
   );
 
 }
-
 
 const styles = StyleSheet.create({
   container: {
