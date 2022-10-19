@@ -1,89 +1,140 @@
-import { StyleSheet, Text, Button, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, Button, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useState } from 'react';
+import { Component, useState } from 'react';
 import { useForm, Controller } from "react-hook-form";
 import { AntDesign } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons'; 
 
 const Usuarios = [
   { id: "0", user: "juan", rol: "admin", password: "admin123" },
-  { id: "1", user: "manu", rol: "user", password: "123" },
+  { id: "1", user: "mateo", rol: "user", password: "contra" },
   { id: "2", user: "carlos", rol: "user", password: "cls" },
   { id: "3", user: "mou", rol: "user", password: "az2" },
   { id: "4", user: "gelus", rol: "admin", password: "adm123" },
   { id: "5", user: "cris", rol: "user", password: "4855" },
-  { id: "6", user: "zaira", rol: "admin", password: "admin" },
+  { id: "6", user: "clara", rol: "admin", password: "admin" },
   { id: "7", user: "rolo", rol: "user", password: "2020" }
 ]
 
-function UserScreen({ navigation }) {
-  const [fullUser, setfullUser] = useState('');
-  const [fullRol, setfullRol] = useState('');
-  const [fullPassword, setfullPassword] = useState('');
+function Limpiar() {
+  setDatos('')
+}
 
-  const validate = () => {
-    if (fullRol == "gelus@gmail.com") {
-      setfullRol("");
-      setfullUser("")
-      navigation.navigate('Profile', { fullUser: fullUser, rol: fullRol })
+function UserScreen({ navigation }) {
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      User:'',
+      Rol: '',
+      Password: ''
+    }
+    
+  })
+  const onSumbit = data => {
+   let iniciosesion = InicioSesion(data.User, data.Rol, data.Password)
+    console.log(data.User, data.Rol, data.Password);
+    console.log(iniciosesion);
+    if (iniciosesion.estado) {
+      navigation.navigate('Profile', { fullUser: data.User, rol: iniciosesion.rol, id: iniciosesion.id })
+      reset()
+
     }
   }
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 
 
-      <TextInput
-        style={styles.inputs}
-        value={fullUser}
-        onChangeText={value => setfullUser(value)}
-        placeholder={"Ingrese usuario"}
-      />
+      <View style ={styles.centerContainer}>
+        <Image 
+          style = {styles.imgStyle}
+          source = {require('./src/img/bank.jpg')}
+        />
+      </View>
 
 
-      <TextInput
-        style={styles.inputs}
-        value={fullRol}
-        onChangeText={value => setfullRol(value)}
-        placeholder={"Ingrese un rol"}
-      />
-
-
-      <TextInput
-        style={styles.inputs}
-        placeholder="contraseña"
-        secureTextEntry={true}
-        value={fullPassword}
-        onChangeText={value => setfullPassword(value)}
-      />
-
-
-
-      <Button
-        title="Iniciar Sesion"
-        //onPress={() => navigation.navigate('Settings')}
-        //onPress={validate}
-        onPress={() => {
-          let iniciosesion = InicioSesion(fullUser, fullRol, fullPassword)
-          console.log(fullUser, " ", fullRol, " ", fullPassword);
-          console.log(iniciosesion);
-          if (iniciosesion.estado) {
-            setfullRol("");
-            setfullUser("");
-            setfullPassword("");
-            navigation.navigate('Profile', { fullUser: fullUser, rol: iniciosesion.rol, id: iniciosesion.id })
-          }
+      <Controller
+        control={control}
+        rules={{
+          required: true,
+          pattern: /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/,
         }}
-
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={styles.inputs}
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}
+            // value={fullUser} 
+            // onChangeText={value => setfullUser(value)}
+            placeholder={"Ingrese usuario"}
+          />
+        )}
+        name="User" //Estado a validar
       />
+      {errors.User?.type == "required" && <Text style={{ color: 'red' }}>El campo identificacion es obligatorio</Text>}
+      {errors.User?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es texto</Text>}
+
+      <Controller
+        control={control}
+        rules={{
+          required: true,
+          pattern: /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/,
+          
+        }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={styles.inputs}
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}
+            // value={fullRol}
+            // onChangeText={value => setfullRol(value)}
+            placeholder={"Ingrese un rol"}
+          />
+        )}
+        name="Rol" //Estado a validar
+      />
+      {errors.Rol?.type == "required" && <Text style={{ color: 'red' }}>El campo identificacion es obligatorio</Text>}
+      {errors.Rol?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es texto</Text>}
+
+      <Controller
+        control={control}
+        rules={{
+          required: true,
+          pattern: /^[a-z0-9_-]{6,18}$/,
+         
+        }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={styles.inputs}
+            placeholder="contraseña"
+            secureTextEntry={true}
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}
+            // value={fullPassword}
+            // onChangeText={value => setfullPassword(value)}
+          />
+        )}
+        name="Password" //Estado a validar
+      />
+      {errors.Password?.type == "required" && <Text style={{ color: 'red' }}>La contraseña  es obligatorio</Text>}
+      {errors.Password?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es texto</Text>}
+      <TouchableOpacity
+        style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
+        onPress={handleSubmit(onSumbit)}
+      >
+        <Text>Enviar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 function InicioSesion(user, rol, pass) {
   const id_user = Usuarios.find(usuario => usuario.user == user && rol == "admin" && usuario.rol == rol && usuario.password == pass) ? Usuarios.find(usuario => usuario.user == user && rol == "admin" && usuario.rol == rol && usuario.password == pass).id : false;
-  const respuesta = Usuarios.find(usuario => usuario.user == user && rol == "admin" && usuario.rol == rol && usuario.password == pass) ? { estado: true, rol: "admin", id: id_user } : Usuarios.find(usuario => usuario.user == user && rol == "user" && usuario.rol == rol && usuario.password == pass) ? { estado: true, rol: "user", id: id_user } : { estado: false, rol: false, id: id_user };
+  const respuesta = Usuarios.find(usuario => usuario.user == user && rol == "admin" && usuario.rol == rol && usuario.password == pass) ? { estado: true, rol: "admin", id: id_user } : Usuarios.find(usuario => usuario.user == user && rol == "user" && usuario.rol == rol && usuario.password == pass) ? { estado: false, rol: false, id: id_user } : { estado: false, rol: false, id: id_user };
   return respuesta;
 }
 
@@ -126,20 +177,7 @@ function ProfileScreen({ route }){
       <Text>Perfil: {route.params.fullUser}</Text>
       <Text>rol: {route.params.rol}</Text>
       <Text>id: {route.params.id}</Text>
-      {/* <Controller
-        control={control}
-        rules={{
-          required: true,
-          pattern: /^[A-Za-zÑñáéíóú ]+$/i,
-          maxLength: 30,
-          minLength: 5,
-          
-        }}
-        render={({field:{onChange,onBlur,value}}) => (
-          
-        )}
-        name="Cuenta"
-      /> */}
+    
       <TextInput
         style={styles.inputs}
         placeholder="Cuenta"
@@ -248,7 +286,7 @@ function ProfileScreen({ route }){
       
       <TouchableOpacity
         style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
-        
+        onPress={()=>Limpiar()}
       >
         <Text>Eliminar</Text>
       </TouchableOpacity>
@@ -299,7 +337,7 @@ function HomeTabs() {
         component={UserScreen}
         options={{
           title: 'Inicio', tabBarStyle: { display: "none" }, tabBarIcon: ({ color, size }) =>
-            <AntDesign name="lock" size={30} color="black" />
+            <FontAwesome5 name="key" size={24} color="black" />
         }}
       />
       <Tab.Screen
@@ -307,7 +345,7 @@ function HomeTabs() {
         component={ProfileScreen}
         options={{
           title: 'Perfil', tabBarIcon: ({ color, size }) =>
-            (<AntDesign name="profile" size={28} color="black" />)
+            (<MaterialIcons name="admin-panel-settings" size={30} color="black" />)
         }}
       />
       <Tab.Screen
@@ -315,7 +353,7 @@ function HomeTabs() {
         component={AccountScreen}
         options={{
           title: 'Movimientos', tabBarIcon: ({ color, size }) =>
-            <MaterialCommunityIcons name="bank-transfer" size={35} color="black" />
+            <FontAwesome5 name="file-invoice-dollar" size={24} color="black" />
         }}
       />
 
@@ -347,10 +385,18 @@ const styles = StyleSheet.create({
   },
   inputs: {
     borderWidth: 1,
-    borderColor: 'green',
-    borderRadius: 10,
+    borderColor: 'blue',
     padding: 10,
     textAlign: 'center',
     marginBottom: 5
+  },
+  centerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom:40
+  },
+  imgStyle: {
+    width:200,
+    height:200
   }
 });
