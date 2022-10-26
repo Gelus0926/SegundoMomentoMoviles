@@ -143,7 +143,6 @@ function ProfileScreen({ route }){
   const [Cuenta, setCuenta] = useState(((Math.random() * (80 - 1 + 1)) + 1).toFixed());
   const { control, handleSubmit, formState: {errors}   } = useForm({
     defaultValues: {
-      Cuenta: 0,
       Identificacion: 0,
       Titular: '',
       date: '',
@@ -286,7 +285,7 @@ function ProfileScreen({ route }){
       
       <TouchableOpacity
         style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
-        onPress={()=>Limpiar()}
+        //onPress={()=>Limpiar()}
       >
         <Text>Eliminar</Text>
       </TouchableOpacity>
