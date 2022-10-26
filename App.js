@@ -10,7 +10,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const Usuarios = [
   { id: "0", user: "juan", rol: "admin", password: "admin123" },
-  { id: "1", user: "mateo", rol: "user", password: "contra" },
+  { id: "1", user: "mateo", rol: "user", password: "contra123" },
   { id: "2", user: "carlos", rol: "user", password: "cls" },
   { id: "3", user: "mou", rol: "user", password: "az2" },
   { id: "4", user: "gelus", rol: "admin", password: "adm123" },
@@ -141,7 +141,8 @@ function InicioSesion(user, rol, pass) {
 function ProfileScreen({ route }){
   const [Datos , setDatos] = useState([]);
   const [Cuenta, setCuenta] = useState(((Math.random() * (80 - 1 + 1)) + 1).toFixed());
-  const { control, handleSubmit, formState: {errors}   } = useForm({
+  const [datoEncontrado,setDatoEncontrado] = useState('');
+  const { control, handleSubmit,reset , formState: {errors}   } = useForm({
     defaultValues: {
       Identificacion: 0,
       Titular: '',
@@ -163,6 +164,7 @@ function ProfileScreen({ route }){
     for (let Registro of Datos) {
       if (Registro.Cuenta == Cuenta) {
         Encontrado = 'Si'
+        setDatoEncontrado(`cuenta: ${Registro.Cuenta} , identificacion: ${Registro.Identificacion} , titular:${Registro.Titular} , date: ${Registro.date} , salario: ${Registro.salario}`)
         console.log(Registro)
       }
     }
@@ -180,6 +182,7 @@ function ProfileScreen({ route }){
       <TextInput
         style={styles.inputs}
         placeholder="Cuenta"
+        onChangeText={Cuenta => setCuenta(Cuenta)}
         value={Cuenta}
       />
     
@@ -188,8 +191,6 @@ function ProfileScreen({ route }){
         rules={{
           required: true,
           pattern: /^[0-9]+$/,
-          maxLength: 200,
-          minLength: 7
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
@@ -269,7 +270,7 @@ function ProfileScreen({ route }){
       {errors.salario?.type == "pattern" && <Text style={{ color: 'red' }}>Este campo solo es numerico</Text>}
       {errors.salario?.type == "max" && <Text style={{ color: 'red' }}>El limite del salario son 10000000</Text>}
       {errors.salario?.type == "min" && <Text style={{ color: 'red' }}>El salario no puede ser menor a 1000000</Text>}
-
+      <Text>{datoEncontrado}</Text>
       <TouchableOpacity
         style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
         onPress={handleSubmit(onSumbit)}
@@ -285,7 +286,11 @@ function ProfileScreen({ route }){
       
       <TouchableOpacity
         style={{ backgroundColor: '#33FFDA', padding: 10, marginTop: 20, width: 90, textAlign: 'center' }}
-        //onPress={()=>Limpiar()}
+        onPress={()=>{
+          reset()
+          setCuenta(((Math.random() * (80 - 1 + 1)) + 1).toFixed())
+          setDatoEncontrado("")
+        }}
       >
         <Text>Eliminar</Text>
       </TouchableOpacity>
